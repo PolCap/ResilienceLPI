@@ -20,9 +20,10 @@ _Maintaining the resilience of natural populations, their ability to resist and 
 
 ## Data
 
-- __`RecoveryChangeData.RData`__: contains the outcomes of the state-space models fit on the recovery time-series. 
-- __`ResistanceChangeData.RData`__: contains the outcomes of the state-space models fit on the recovery time-series.
+- __`RecoveryChange.RData`__: contains the outcomes of the state-space models fit on the recovery time-series. 
+- __`ResistanceChange.RData`__: contains the outcomes of the state-space models fit on the recovery time-series.
 - __`Body_Mass_means.csv`__: contains the mean values of the adult body weight (g) of the studied species, please check [Noviello et al. 2021](https://doi.org/10.1101/2020.12.17.423192) for further details on how the data was collected.
+- __`PopChangeData.RData`__: contains the outcomes of the state-space models from the population abundance time-series from the Living Planet Database.  
 
 ---
 
