@@ -8,8 +8,6 @@ Pol Capdevila<sup>1</sup>*, Nicola Noviello<sup>1</sup>, Louise McRae<sup>2</sup
 
 #### Contact: pcapdevila.pc[at]gmail.com
 
-This repository contains the code for the statistical analyses of the manuscript "Global patterns of resilience decline in vertebrate populations".
-
 ---
 
 ## Aim of the study
