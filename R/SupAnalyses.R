@@ -372,15 +372,15 @@ dec_pop <- pops_data %>% filter(mu<0)
 
 # Now subset using the IDs for each 
 
-rec_data <- rec_data %>% filter(ID%in%dec_pop$ID) # Recovery
-res_data <- res_neg %>% filter(ID%in%dec_pop$ID) # Resistance
+rec_data_dec <- rec_data %>% filter(ID%in%dec_pop$ID) # Recovery
+res_data_dec <- res_neg %>% filter(ID%in%dec_pop$ID) # Resistance
 
 # Number of threats on recovery ------------------------------------------------
 
 m1 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat-1 + (1|SpeciesName),
           iter = iter, thin = thin, warmup = warmup,
           prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-          data = rec_data, family = gaussian,
+          data = rec_data_dec, family = gaussian,
           cores = 20)
 
 # System -----------------------------------------------------------------------
@@ -388,7 +388,7 @@ m1 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat-1 + (1|SpeciesName),
 m2 <- brm(mu | se(tau, sigma = TRUE) ~ System-1 + (1|SpeciesName),
           iter = iter, thin = thin, warmup = warmup,
           prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-          data = rec_data, family = gaussian,
+          data = rec_data_dec, family = gaussian,
           cores = 20)
 
 # Taxa -------------------------------------------------------------------------
@@ -396,30 +396,30 @@ m2 <- brm(mu | se(tau, sigma = TRUE) ~ System-1 + (1|SpeciesName),
 m3 <- brm(mu | se(tau, sigma = TRUE) ~ Taxon-1 + (1|SpeciesName),
           iter = iter, thin = thin, warmup = warmup,
           prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-          data = rec_data, family = gaussian,
+          data = rec_data_dec, family = gaussian,
           cores = 20)
 
-# Interactive models ###############################
+# Number of threats and system -------------------------------------------------
 
 mi1 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat:System - 1 + (1 | SpeciesName),
            iter = iter, thin = thin,  warmup = warmup,
            prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-           data = rec_data,
+           data = rec_data_dec,
            family = gaussian,
            cores = 20)
+
+# Number of threats and taxa ---------------------------------------------------
 
 mi2 <-  brm(mu | se(tau, sigma = TRUE) ~ n.threat:Taxon - 1 + (1 | SpeciesName),
             iter = iter,
             thin = thin,
             warmup = warmup,
             prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-            data = rec_data,
+            data = rec_data_dec,
             family = gaussian,
             cores = 20)
 
-# Number of threats on resilience--------
-
-# fit the model
+# Number of threats ------------------------------------------------------------
 
 m4 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat-1 + (1|SpeciesName) ,
           iter = iter, thin = thin, warmup = warmup,
@@ -428,41 +428,40 @@ m4 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat-1 + (1|SpeciesName) ,
           family = gaussian,
           cores = 20)
 
-# System on resistance--------
-# fit the model
+# System -----------------------------------------------------------------------
 
 m5 <- brm(mu | se(tau, sigma = TRUE) ~ System - 1 + (1|SpeciesName) ,
           iter = iter,  thin = thin,  warmup = warmup,
           prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-          data = res_data,
+          data = res_data_dec,
           family = gaussian,
           cores = 20)
 
-# Effect of class ----------------
-
-# fit the model
+# Taxa -------------------------------------------------------------------------
 
 m6 <- brm(mu | se(tau, sigma = TRUE) ~ Taxon - 1 + (1|SpeciesName) ,
           iter = iter, thin = thin,  warmup = warmup,
           prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-          data = res_data,
+          data = res_data_dec,
           family = gaussian,
           cores = 20)
 
-# Interactive models ###############################
+# Number of threats and system -------------------------------------------------
 
 mi3 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat:System - 1 + (1|SpeciesName) ,
            iter = iter, thin = thin,  warmup = warmup,
            prior= prior, control = list(adapt_delta = .975, max_treedepth = 20),
-           data = res_data,
+           data = res_data_dec,
            family = gaussian,
            cores = 20)
+
+# Number of threats and Taxa ---------------------------------------------------
 
 mi4 <- brm(mu | se(tau, sigma = TRUE) ~ n.threat:Taxon - 1 + (1|SpeciesName) ,
            iter = iter, thin = thin, warmup = warmup,
            prior= prior, 
            control = list(adapt_delta = .975, max_treedepth = 20),
-           data = res_data,
+           data = res_data_dec,
            family = gaussian,
            cores = 20)
 
@@ -472,4 +471,4 @@ setwd(DataPath)
 save(file = "SuppAnal2.RData", 
      m1,m2,m3,m4,m5,m6,
      mi1, mi2, mi3,mi4, 
-     res_data, rec_data)
+     res_data_dec, rec_data_dec)
