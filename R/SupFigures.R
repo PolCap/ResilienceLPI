@@ -693,41 +693,13 @@ ggsave("FigureS4.pdf", figure4,
 
 # Further supplementary figures ################################################
 
-load(paste0(DataPath, "/ResistanceData.RData"))
-load(paste0(DataPath, "/RecoveryData.RData"))
+load(paste0(DataPath, "/ResistanceChange.RData"))
+load(paste0(DataPath, "/RecoveryChange.RData"))
 load(paste0(ResultPath,"/SupMod.RData"))
-
-
-# Classify taxonomic groups into major ones
-
-rec_data <- rec_data %>% 
-  mutate(Taxon= ifelse(Class=="Holocephali"|Class=="Elasmobranchii" | 
-                         Class=="Myxini"|Class=="Cephalaspidomorphi"|
-                         Class=="Actinopterygii"|Class=="Sarcopterygii",
-                       "Fish", 
-                       ifelse(Class=="Aves", "Birds",
-                              ifelse(Class=="Mammalia", 
-                                     "Mammals",
-                                     ifelse(Class=="Amphibia", 
-                                            "Amphibians",
-                                            ifelse(Class=="Reptilia",
-                                                   "Reptiles"))))))
-res_data <- res_data %>% 
-  mutate(Taxon= ifelse(Class=="Holocephali"|Class=="Elasmobranchii" | 
-                         Class=="Myxini"|Class=="Cephalaspidomorphi"|
-                         Class=="Actinopterygii"|Class=="Sarcopterygii",
-                       "Fish", 
-                       ifelse(Class=="Aves", "Birds",
-                              ifelse(Class=="Mammalia", 
-                                     "Mammals",
-                                     ifelse(Class=="Amphibia", 
-                                            "Amphibians",
-                                            ifelse(Class=="Reptilia",
-                                                   "Reptiles"))))))
 
 # Figure S5: Body size effects #################################################
 
-(gs5a <- bs %>%
+(gs5a <- bs_res %>%
    gather_draws(`b_.*`, regex = TRUE) %>%
    median_qi(.value, .width = c(.95, .8, .5)) %>% 
    mutate(stress =gsub("b_", "", .variable),
@@ -747,7 +719,7 @@ res_data <- res_data %>%
    labs(x="Posterior estimate", y = "Body mass (g) and Taxonomic group") + 
    theme(legend.position = "none"))
 
-(gs5b <- bsr %>%
+(gs5b <- bs_rec %>%
     gather_draws(`b_.*`, regex = TRUE) %>%
     median_qi(.value, .width = c(.95, .8, .5)) %>% 
     mutate(stress =gsub("b_", "", .variable),
@@ -774,13 +746,153 @@ res_data <- res_data %>%
                   align = "h", 
                   axis = "b") )
 
-ggsave(gs1, filename = "Figure S5.pdf",
+ggsave(gs5, filename = "Figure S5.pdf",
        path = ResultPath, 
        width = 10, height = 6)
 
-# Figure S6: Duration ##########################################################
+# Figure S6: Phylogenetic signal ###############################################
+# Import data 
+load(paste0(ResultPath, "/PSModels.RData"))
 
-(gs6a <- duration_res %>%
+# Import phylopics
+
+mammals <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/05f87521-20d4-4a05-8ac6-aa0bab7f1394.512.png"))
+birds <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/a6ef5684-5683-4a46-aa2d-d39c0d134ba7.512.png"))
+amphibians <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/35237d88-e323-44dc-8349-b70fe078c5e7.512.png"))
+reptiles <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/a359e147-c088-4c18-a2f1-49abfb2b9325.512.png"))
+fish <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/8a9bc7b5-360c-4f2a-9487-723dcd3deb8b.256.png"))
+
+# Create a common data frame
+
+# Resistance 
+
+psign_res <- rbind(data.frame(taxon= "Amhibians",dist=psign_res_amp$samples$H1), 
+                   data.frame(taxon= "Birds", dist=psign_res_bird$samples$H1),
+                   data.frame(taxon= "Mammals",dist=psign_res_mam$samples$H1),
+                   data.frame(taxon= "Reptiles",dist=psign_res_rep$samples$H1),
+                   data.frame(taxon= "Fish",dist=psign_res_fish$samples$H1))
+
+# Calculate the median 
+
+res_median <- psign_res %>%
+  group_by(taxon) %>% 
+  summarise(median=median(dist))
+
+# Plot 
+
+(ga <- psign_res %>% 
+    ggplot(aes(y=taxon, x=dist, color=taxon)) +
+    stat_halfeye(aes(color = taxon,
+                     fill=after_scale(colorspace::lighten(color, .3))),
+                 shape = 18,
+                 point_size = 3,
+                 interval_size = 1.8,
+                 adjust = .5) +
+    geom_text(data=res_median,
+              aes(x = median, label = format(round(median, 2), nsmall = 2)),
+              stat = "unique",
+              color = "black",
+              fontface = "bold",
+              size = 3.4,
+              nudge_y = .15)+
+    scale_color_manual(values = wesanderson::wes_palette("Cavalcanti1", n = 5))+
+    geom_vline(xintercept = 0.5, linetype = "dashed", colour="grey50") +
+    labs(x="Phylogenetic signal", y="")+
+    theme(legend.position = "none")+
+    xlim(0,1))
+
+# Add the silhouettes 
+
+(ga <- ggdraw(ga) + 
+    draw_image(amphibians, x = 0.7, 
+               y =0.2, 
+               width = 0.1, height = 0.05)+  
+    draw_image(birds, x = 0.7, 
+               y = 0.35, 
+               width = 0.1, height = 0.07)+
+    draw_image(fish, x = 0.7, 
+               y = 0.52, 
+               width = 0.1, height = 0.04)+
+    draw_image(mammals, x = 0.70, 
+               y = 0.67, 
+               width = 0.1, height = 0.07)+
+    draw_image(reptiles, 
+               x = 0.7, 
+               y = 0.8, 
+               width = 0.1, height = 0.07))
+# Recovery
+
+psign_rec <- rbind(data.frame(taxon= "Amhibians",dist=psign_rec_amp$samples$H1), 
+                   data.frame(taxon= "Birds", dist=psign_rec_bird$samples$H1),
+                   data.frame(taxon= "Mammals",dist=psign_rec_mam$samples$H1),
+                   data.frame(taxon= "Reptiles",dist=psign_rec_rep$samples$H1),
+                   data.frame(taxon= "Fish",dist=psign_rec_fish$samples$H1))
+
+# Calculate the median 
+
+rec_median <- psign_rec %>%
+  group_by(taxon) %>% 
+  summarise(median=median(dist))
+
+# Plot 
+
+(gb <- psign_rec %>% 
+    ggplot(aes(y=taxon, x=dist, color=taxon)) +
+    stat_halfeye(aes(color = taxon,
+                     fill=after_scale(colorspace::lighten(color, .3))),
+                 shape = 18,
+                 point_size = 3,
+                 interval_size = 1.8,
+                 adjust = .5) +
+    geom_text(data=rec_median,
+              aes(x = median, label = format(round(median, 2), nsmall = 2)),
+              stat = "unique",
+              color = "black",
+              fontface = "bold",
+              size = 3.4,
+              nudge_y = .15)+
+    scale_color_manual(values = wesanderson::wes_palette("Cavalcanti1", n = 5))+
+    geom_vline(xintercept = 0.5, linetype = "dashed", colour="grey50") +
+    labs(x="Phylogenetic signal", y="")+
+    theme(legend.position = "none")+
+    xlim(0,1))
+
+# Add the silhouettes 
+
+(gb <- ggdraw(gb) + 
+    draw_image(amphibians, x = 0.7, 
+               y =0.2, 
+               width = 0.1, height = 0.05)+  
+    draw_image(birds, x = 0.7, 
+               y = 0.35, 
+               width = 0.1, height = 0.07)+
+    draw_image(fish, x = 0.7, 
+               y = 0.52, 
+               width = 0.1, height = 0.04)+
+    draw_image(mammals, x = 0.70, 
+               y = 0.67, 
+               width = 0.1, height = 0.07)+
+    draw_image(reptiles, 
+               x = 0.7, 
+               y = 0.8, 
+               width = 0.1, height = 0.07))
+
+# Combine figures
+
+(figureS6 <- plot_grid(ga, gb, 
+                       labels = "auto",
+                       nrow = 1,
+                       align = "hv", axis = "b")) 
+
+# Save it
+
+ggsave("FigureS6.pdf", figureS6, 
+       width = 10, height = 8,
+       path = ResultPath)
+
+# Figure S7: Duration ##########################################################
+
+(gS7a <- duration_res %>%
    gather_draws(`b_.*`, regex = TRUE) %>%
    median_qi(.value, .width = c(.95, .8, .5)) %>% 
    mutate(stress =gsub("b_", "", .variable),
@@ -793,7 +905,7 @@ ggsave(gs1, filename = "Figure S5.pdf",
    labs(x="Posterior estimate", y = "Duration") + 
    theme(legend.position = "none"))
 
-(gs6b <- duration_rec %>%
+(gS7b <- duration_rec %>%
     gather_draws(`b_.*`, regex = TRUE) %>%
     median_qi(.value, .width = c(.95, .8, .5)) %>% 
     mutate(stress =gsub("b_", "", .variable),
@@ -806,54 +918,46 @@ ggsave(gs1, filename = "Figure S5.pdf",
     labs(x="Posterior estimate", y = "") + 
     theme(legend.position = "none"))
 
-(gs6 <- plot_grid(gs6a, gs6b, 
+(gS7 <- plot_grid(gS7a, gS7b, 
                   labels = "auto", 
                   nrow = 1,
                   align = "h", 
                   axis = "b") )
 
-ggsave(gs6, filename = "Figure S6.pdf",
+ggsave(gS7, filename = "Figure S7.pdf",
        path = ResultPath, 
        width = 10, height = 6)
 
-# Figure S7: Duration vs start year ############################################
-
-# Estimate the duration
-
-rec_data <- rec_data %>% 
-  mutate(Duration=End-Start)
-
-res_data <-res_data %>% 
-  mutate(Duration=End-Start)
+# Figure S8: Duration vs start year ############################################
 
 # Plot it 
 
-(gs7a <- ggplot(res_data, 
+(gS8a <- ggplot(res_data, 
                 aes(x=Start,y=Duration, 
                     group=Start)) +
     geom_boxplot(fill="#C4AF8F") +
     scale_x_continuous(breaks = (seq(1950,2015, by=10)))+
     labs(x=""))
 
-(gs7b <- ggplot(rec_data, 
+(gS8b <- ggplot(rec_data, 
                 aes(x=Start,y=Duration, group=Start)) +
     geom_boxplot(fill="#90AFC5") +
     scale_x_continuous(breaks = (seq(1950,2015, by=10)))+
     labs(x="Starting year of the time series"))
 
-(gs7 <- plot_grid(gs7a, gs7b, 
+(gS8 <- plot_grid(gS8a, gS8b, 
                   labels = "auto", 
                   nrow = 2,
                   align = "v", 
                   axis = "b") )
 
-ggsave(gs7, filename = "Figure S7.pdf",
+ggsave(gS8, filename = "Figure S8.pdf",
        path = ResultPath, 
        width = 11, height = 8)
 
-# Figure S8: Decades ###########################################################
+# Figure S9: Decades ###########################################################
 
-(gs8a <- mts_res %>%
+(gS9a <- mts_res %>%
    gather_draws(`b_.*`, regex = TRUE) %>%
    median_qi(.value, .width = c(.95, .8, .5)) %>% 
    mutate(stress= gsub(":.*", "", .variable),
@@ -872,7 +976,7 @@ ggsave(gs7, filename = "Figure S7.pdf",
                       colour="grey40") +
    labs(x="Decade", y = "Posterior estimate"))
 
-(gs8b <- mts_rec %>%
+(gS9b <- mts_rec %>%
     gather_draws(`b_.*`, regex = TRUE) %>%
     median_qi(.value, .width = c(.95, .8, .5)) %>% 
     mutate(stress= gsub(":.*", "", .variable),
@@ -892,17 +996,17 @@ ggsave(gs7, filename = "Figure S7.pdf",
     labs(x="Decade", y = "Posterior estimate"))
 
 
-(gs8 <- plot_grid(gs8a+labs(x=""), gs8b, 
+(gS9 <- plot_grid(gS9a+labs(x=""), gS9b, 
                   labels = "auto", 
                   nrow = 2,
                   align = "v", 
                   axis = "b") )
 
-ggsave(gs8, filename = "Figure S8.pdf",
+ggsave(gS9, filename = "Figure S9.pdf",
        path = ResultPath, 
        width = 12, height = 8)
 
-# Figure S9: System taxa #######################################################
+# Figure S10: System taxa #######################################################
 
 # Resistance
 
@@ -961,7 +1065,7 @@ dat <- mst_res %>%
   filter(Taxon!="Amphibians"| System!="Marine",
          Taxon!="Fish"|System!="Terrestrial")
 
-(gs9a <- mst_res %>%
+(gS10a <- mst_res %>%
     gather_draws(`b_.*`, regex = TRUE) %>%
     median_qi(.value, .width = c(.95, .8, .5)) %>% 
     mutate(Taxon = gsub("Taxon", "", .variable),
@@ -1117,10 +1221,10 @@ t2 <- ggdraw() + draw_label("Recovery",angle = -90,
                             fontface='bold',size = 18)
 titles <- plot_grid(t1,t2, ncol = 1)
 
-(figureS9<- plot_grid(ggf, titles,  
+(figureS10<- plot_grid(ggf, titles,  
                       ncol=2, rel_widths =c(1, 0.02)))
 
-ggsave("FigureS9.pdf", figureS8, 
+ggsave("FigureS10.pdf", figureS10, 
        width = 12, height = 10,
        path = ResultPath)
 
