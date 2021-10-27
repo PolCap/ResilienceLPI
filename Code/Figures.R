@@ -268,7 +268,7 @@ legend4 <- get_legend(legend4)
 
 # Put the maps together ------------
 
-figure1 <- ggarrange(gg1, 
+figure2 <- ggarrange(gg1, 
                  gg2,
                  labels = "auto",
                  nrow = 2,
@@ -276,7 +276,7 @@ figure1 <- ggarrange(gg1,
 
 # Save it
 
-ggsave("Figure1.pdf", figure1, 
+ggsave("Fig.2.pdf", figure2, 
        width = 10, height = 10,
        path = ResultPath)
 
@@ -326,7 +326,7 @@ theme_set(theme_minimal()+
                   plot.margin = unit(c(0,0,0,0), units = , "cm")))
 
 
-# Figure 3: General model outcomes #############################################
+# Figure 4: General model outcomes #############################################
 
 # Panel a: negative lambda vs number of stressors ------------------------------
 
@@ -632,14 +632,14 @@ t2 <- ggdraw() + draw_label("Recovery",angle = -90,
                             fontface='bold',size = 18)
 titles <- plot_grid(t1,t2, ncol = 1)
 
-(figure2<- plot_grid(ggf, titles,  
+(figure4<- plot_grid(ggf, titles,  
                      ncol=2, rel_widths =c(1, 0.02)))
 
-ggsave("Figure3.pdf", figure2, 
+ggsave("Fig.4.pdf", figure4, 
        width = 12, height = 10,
        path = ResultPath)
 
-# Figure 4: Interactions System ################################################
+# Figure 5: Interactions System ################################################
 
 # Resistance -------------------------------------------------------------------
 
@@ -796,16 +796,16 @@ titles <- plot_grid(t1,t2, ncol = 1)
 
 # Combine again
 
-(figure3<- plot_grid(ggf, titles,  
+(figure5<- plot_grid(ggf, titles,  
                      ncol=2, rel_widths =c(1, 0.02)))
 
 # Save the plot
 
-ggsave("Figure4.pdf", figure3, 
+ggsave("Fig.5.pdf", figure5, 
        width = 12, height = 10,
        path = ResultPath)
 
-# Figure 5: Interaction Taxon ##################################################
+# Figure 6: Interaction Taxon ##################################################
 
 # Here we define the limits of the x scale for each faced
 
@@ -972,7 +972,7 @@ titles <- plot_grid(t1,t2, ncol = 1)
 
 # Combine again 
 
-(ggf4<- plot_grid(ggf, titles,  
+(ggf6<- plot_grid(ggf, titles,  
                      ncol=2, rel_widths =c(1, 0.02)))
 
 # Import phylopics
@@ -985,7 +985,7 @@ fish <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/8a
 
 # Add the silhouettes 
 
-(figure4 <- ggdraw(ggf4) + 
+(figure6 <- ggdraw(ggf6) + 
     draw_image(amphibians, x = 0.14, 
                y = 0.075, 
                width = 0.1, height = 0.05)+
@@ -1005,7 +1005,7 @@ fish <-  readPNG(getURLContent("http://phylopic.org/assets/images/submissions/8a
 
 # Save it
 
-ggsave("Figure5.pdf", figure4, 
+ggsave("Fig.6.pdf", figure6, 
        width = 14.5, height = 8,
        path = ResultPath)
 
