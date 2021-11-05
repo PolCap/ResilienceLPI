@@ -1,8 +1,8 @@
 # --------------------------------------------------------------------------------------- #
 # - FILE NAME:   SupAnalyses.R
 # - DATE:        20/11/2020
-# - DESCRIPTION: Supplementary analyses using the lambda trends to analyse the 
-#                other factors determining the poulation change
+# - DESCRIPTION: Supplementary analyses using the population growth (r) trends to 
+#                analyse the other factors determining the resilience change
 # - AUTHORS:     Pol Capdevila Lanzaco (pcapdevila.pc@gmail.com)
 # --------------------------------------------------------------------------------------- #
 
@@ -30,13 +30,12 @@ CodePath <- paste0(path, "Code")
 DataPath <-  paste0(path, "Data")
 ResultPath <-  paste0(path, "Results")
 
-# Resistance ###################################################################
-
 # Load data
 
 load(paste0(DataPath, "/ResistanceChange.RData"))
 load(paste0(DataPath, "/RecoveryChange.RData"))
 
+# Resistance ###################################################################
 # Read csv with body sizes
 
 setwd(DataPath)
