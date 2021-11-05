@@ -34,7 +34,7 @@ _Maintaining the resilience of natural populations, their ability to resist and 
 
 To run the statistical analyses we used different R scripts: 
 
-- __`Analyses.R`__: code to analyse the factors influencing resistance and recovery loss. These analyses require a lot of computing power, so be minfult of that.
+- __`Analyses.R`__: code to analyse the factors influencing resistance and recovery loss. These analyses require a lot of computing power.
 - __`Figures.R`__: code to create the figures and tables of the study. 
 - __`SupAnalyses.R`__: code to do the supplementary analyses. 
 - __`SupFigures.R`__: code to create the supplementary figures. 
